@@ -3,5 +3,5 @@
 #include<unistd.h>
 
 int main() {
-	printf("%d", sizeof(struct termios));
+	printf("%ld", sizeof(unsigned short));
 }

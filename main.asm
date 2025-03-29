@@ -6,6 +6,13 @@ section .text
 
 _start:
   call init
+
+  mov rax, 2
+  mov rdi, [rsp+16]
+  mov rsi, O_CREAT | O_RDWR
+  mov rdx, S_IRGRP | S_IROTH | S_IRUSR | S_IWUSR
+  syscall
+
   mov rax, 1
   mov rdi, STDOUT_FILENO
   mov rsi, clear_screen
@@ -49,6 +56,9 @@ _start:
   call exit
 
 init: ; save term settings and enter raw mode
+  push rbp 
+  mov rbp, rsp
+
   mov rax, 16
   mov rdi, STDIN_FILENO
   mov rsi, TCGETS
@@ -90,6 +100,7 @@ init: ; save term settings and enter raw mode
   mov rsi, 60
   syscall
 
+  pop rbp
   ret
   
 exit: ; restore term settings and exit
@@ -124,7 +135,7 @@ section .rodata
   msglen: equ $ - msg
   backspace: db 8, ' ', 8
   backspacelen: equ $ - backspace
-  clear_screen: db 27, "[2J"
+  clear_screen: db 27, "[3J", 27, "[2J", 27, "[H"
   clear_screen_len: equ $ - clear_screen
 
 section .bss
