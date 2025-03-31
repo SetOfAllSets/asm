@@ -109,7 +109,7 @@ init: ; save term settings and enter raw mode
   mov rdx, S_IRGRP | S_IROTH | S_IRUSR | S_IWUSR
   syscall
 
-  mov [file], rax
+  mov [fd], rax
 
   pop rbp
   ret
@@ -162,4 +162,5 @@ section .rodata
 section .bss
   termio: resb 60
   char: resb 1
-  file: resq 1
+  fd: resq 1
+  file_addr: resq 1
