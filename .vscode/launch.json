@@ -11,7 +11,8 @@
             "name": "lldb",
             "program": "${fileDirname}/${fileBasenameNoExtension}",
             "stopOnEntry": false,
-            "preLaunchTask": "asm64"
+            "preLaunchTask": "asm64",
+            "args": ["e"]
         },
     ]
 }

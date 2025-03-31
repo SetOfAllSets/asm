@@ -7,18 +7,6 @@ section .text
 _start:
   call init
 
-  mov rax, 2
-  mov rdi, [rsp+16]
-  mov rsi, O_CREAT | O_RDWR
-  mov rdx, S_IRGRP | S_IROTH | S_IRUSR | S_IWUSR
-  syscall
-
-  mov rax, 1
-  mov rdi, STDOUT_FILENO
-  mov rsi, clear_screen
-  mov rdx, clear_screen_len
-  syscall
-
   mov rax, 1
   mov rdi, STDOUT_FILENO
   mov rsi, msg
@@ -100,10 +88,39 @@ init: ; save term settings and enter raw mode
   mov rsi, 60
   syscall
 
+  mov rax, 1
+  mov rdi, STDOUT_FILENO
+  mov rsi, enter_alt_screen_mode
+  mov rdx, enter_alt_screen_mode_len
+  syscall
+
+  mov rax, 1
+  mov rdi, STDOUT_FILENO
+  mov rsi, clear_screen
+  mov rdx, clear_screen_len
+  syscall
+
+  ; create/open file
+  cmp byte [rbp+32], NULL
+  je exit
+  mov rax, 2
+  mov rdi, [rbp+32] ; [rbp+32] = first argument
+  mov rsi, O_CREAT | O_RDWR
+  mov rdx, S_IRGRP | S_IROTH | S_IRUSR | S_IWUSR
+  syscall
+
+  mov [file], rax
+
   pop rbp
   ret
   
 exit: ; restore term settings and exit
+  mov rax, 1
+  mov rdi, STDOUT_FILENO
+  mov rsi, exit_alt_screen_mode
+  mov rdx, exit_alt_screen_mode_len
+  syscall
+
   mov rax, 16
   mov rdi, STDIN_FILENO
   mov rsi, TCSETS
@@ -137,7 +154,12 @@ section .rodata
   backspacelen: equ $ - backspace
   clear_screen: db 27, "[3J", 27, "[2J", 27, "[H"
   clear_screen_len: equ $ - clear_screen
+  enter_alt_screen_mode: db 27, "[?1049h"
+  enter_alt_screen_mode_len: equ $ - enter_alt_screen_mode
+  exit_alt_screen_mode: db 27, "[?1049l"
+  exit_alt_screen_mode_len: equ $ - exit_alt_screen_mode
 
 section .bss
   termio: resb 60
   char: resb 1
+  file: resq 1
