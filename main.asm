@@ -111,6 +111,29 @@ init: ; save term settings and enter raw mode
 
   mov [fd], rax
 
+  mov rax, 9 ; mmap
+  mov rdi, NULL ; let kernel decide address
+  mov rsi, 144 ; enough size for stat (144)
+  mov rdx, PROT_READ | PROT_WRITE ; allow us to read and write to this memory
+  mov r10, MAP_ANONYMOUS | MAP_PRIVATE ; don't map a file to memory, keep changes to (nonexistant) file private
+  mov r8, -1 ; -1 as fd because of MAP_ANONYMOUS
+  mov r9, 0 ; 0 offset
+  syscall
+
+  mov [file_addr], rax
+
+  ; get file size (stat)
+  mov rsi, rax
+  mov rax, 5
+  mov rdi, [fd]
+  syscall
+
+  mov rax, [file_addr+48]
+  mov rdi, 3
+  mul rdi
+  mov rdi, 2
+  div rdi
+
   pop rbp
   ret
   
